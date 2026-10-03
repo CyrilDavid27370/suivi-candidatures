@@ -18,7 +18,9 @@ final class CandidatureController extends AbstractController
     public function index(CandidatureRepository $candidatureRepository): Response
     {
         return $this->render('candidature/index.html.twig', [
-            'candidatures' => $candidatureRepository->findAll(),
+            'candidatures' => $candidatureRepository->findby(
+                ['user' => $this->getUser()]),
+                ['dateCandidature' => 'DESC']
         ]);
     }
 

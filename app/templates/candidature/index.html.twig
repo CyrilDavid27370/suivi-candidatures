@@ -1,9 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidature index{% endblock %}
+{% block title %}Mes candidatures{% endblock %}
 
 {% block body %}
-    <h1>Candidature index</h1>
+    <h1>Mes candidatures</h1>
+
+    <form method="get">
+        <input type="text" name="q" value="{{ recherche }}" placeholder="Entreprise ou poste">
+
+        <select name="statut">
+            <option value="">Tous les statuts</option>
+            {% for statut in statuts %}
+                <option value="{{ statut.value }}" {{ statutActuel == statut ? 'selected' }}>
+                    {{ statut.label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="tri">
+            <option value="desc" {{ tri == 'desc' ? 'selected' }}>Plus récentes d'abord</option>
+            <option value="asc" {{ tri == 'asc' ? 'selected' }}>Plus anciennes d'abord</option>
+        </select>
+
+        <button type="submit">Filtrer</button>
+        <a href="{{ path('app_candidature_index') }}">Réinitialiser</a>
+    </form>
 
     <table class="table">
         <thead>
@@ -41,7 +62,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="11">no records found</td>
+                <td colspan="11">Aucune candidature trouvée</td>
             </tr>
         {% endfor %}
         </tbody>

@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Candidature;
+use App\Entity\User;
+use App\Enum\StatusCandidature;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,23 @@ class CandidatureRepository extends ServiceEntityRepository
         parent::__construct($registry, Candidature::class);
     }
 
-//    /**
-//     * @return Candidature[] Returns an array of Candidature objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findByFilters(User $user, ?StatusCandidature $status, string $recherche, string $tri): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.user = :user')
+            ->setParameter('user', $user);
 
-//    public function findOneBySomeField($value): ?Candidature
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($status !== null) {
+            $qb->andWhere('c.statut = :statut')
+                ->setParameter('statut', $status);
+        }
+
+        if ($recherche !== '') {
+            $qb->andWhere('c.entreprise LIKE :recherche OR c.poste LIKE :recherche')
+                ->setParameter('recherche', '%' . $recherche . '%');
+        }
+            $qb->orderBy('c.dateCandidature', $tri === 'asc' ? 'ASC' : 'DESC');
+
+            return $qb->getQuery()->getResult();
+    }
 }

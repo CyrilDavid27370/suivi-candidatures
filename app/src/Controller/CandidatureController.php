@@ -12,17 +12,25 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Security\Voter\CandidatureVoter;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Enum\StatusCandidature;
 
 #[Route('/candidature')]
+#[IsGranted('ROLE_USER')]
 final class CandidatureController extends AbstractController
 {
     #[Route(name: 'app_candidature_index', methods: ['GET'])]
-    public function index(CandidatureRepository $candidatureRepository): Response
+    public function index(Request $request, CandidatureRepository $candidatureRepository): Response
     {
+        $status = StatusCandidature::tryFrom($request->query->getString('status'));
+        $recherche = trim($request->query->getString('q'));
+        $tri = $request->query->getString('tri', 'desc');
+
         return $this->render('candidature/index.html.twig', [
-            'candidatures' => $candidatureRepository->findby(
-                ['user' => $this->getUser()]),
-                ['dateCandidature' => 'DESC']
+            'candidatures' => $candidatureRepository->findByFilters($this->getUser(), $status, $recherche, $tri),
+            'statuts' => StatusCandidature::cases(),
+            'statutActuel' => $status,
+            'recherche' => $recherche,
+            'tri' => $tri,
         ]);
     }
 
